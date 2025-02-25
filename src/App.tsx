@@ -1,20 +1,36 @@
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, User } from "firebase/auth"; // Import User type
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "./firebase/config";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
+import Dungeon from "./pages/Dungeon";
+
 
 const App = () => {
-  const [user, setUser] = useState<User | null>(null); // Explicitly type state
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); // No TypeScript error now
+      setUser(currentUser);
     });
     return () => unsubscribe();
   }, []);
 
-  return user ? <Home /> : <Login />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        {user ? (
+          <>
+            <Route path="/" element={<Home />} />
+            <Route path="/dungeon/:id" element={<Dungeon />} />
+            </>
+        ) : (
+          <Route path="/*" element={<Login />} />
+        )}
+      </Routes>
+    </BrowserRouter>
+  );
 };
 
 export default App;

@@ -1,7 +1,13 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { auth } from "../firebase/config";
+import { collection, addDoc } from "firebase/firestore";
+import { auth, db } from "@/firebase/config";
 
 const Home = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -11,14 +17,25 @@ const Home = () => {
     }
   };
 
-  const handleCreateDungeon = () => {
-    console.log("Create Dungeon clicked");
-    // Logic to create a new dungeon will go here
+  const handleCreateDungeon = async () => {
+    setLoading(true);
+    try {
+      const docRef = await addDoc(collection(db, "dungeons"), {
+        createdAt: new Date(),
+        users: [],
+      });
+      console.log("Dungeon created with ID: ", docRef.id);
+      navigate(`/dungeon/${docRef.id}`);
+    } catch (error) {
+      console.error("Error creating dungeon: ", error);
+      alert("Failed to create dungeon. Please try again.");
+    }
+    setLoading(false);
   };
 
   const handleJoinDungeon = () => {
-    console.log("Join Dungeon clicked");
-    // Logic to join a dungeon will go here
+    const dungeonId = prompt("Enter Dungeon ID:");
+    if (dungeonId) navigate(`/dungeon/${dungeonId}`);
   };
 
   return (
@@ -29,8 +46,9 @@ const Home = () => {
         <button
           onClick={handleCreateDungeon}
           className="bg-green-500 text-white px-6 py-2 rounded-lg"
+          disabled={loading}
         >
-          Create Dungeon
+          {loading ? "Creating..." : "Create Dungeon"}
         </button>
         <button
           onClick={handleJoinDungeon}
