@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "declaration": false,
     /* General */
     "target": "ESNext",
     "module": "ESNext",
